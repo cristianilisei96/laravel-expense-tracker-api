@@ -36,4 +36,17 @@ class CategoryController extends Controller
             ->route('dashboard')
             ->with('success', 'Category created successfully.');
     }
+
+    public function destroy(Request $request, Category $category): RedirectResponse
+    {
+        if ($category->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $category->delete();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Category deleted successfully.');
+    }
 }

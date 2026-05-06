@@ -178,6 +178,61 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    Categories
+                </h3>
+
+                @if ($categories->isEmpty())
+                    <p class="text-gray-600">
+                        No categories yet. Add your first income or expense category.
+                    </p>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-500">Name</th>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-500">Type</th>
+                                    <th class="px-4 py-2 text-right font-medium text-gray-500">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach ($categories as $category)
+                                    <tr>
+                                        <td class="px-4 py-2 font-medium text-gray-900">
+                                            {{ $category->name }}
+                                        </td>
+
+                                        <td class="px-4 py-2">
+                                            <span
+                                                class="inline-flex items-center rounded px-2 py-1 text-xs font-medium
+                                    {{ $category->type === 'income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                                {{ ucfirst($category->type) }}
+                                            </span>
+                                        </td>
+
+                                        <td class="px-4 py-2 text-right">
+                                            <form method="POST"
+                                                action="{{ route('web.categories.destroy', $category) }}"
+                                                onsubmit="return confirm('Delete this category? Existing transactions will remain without a category.');">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button type="submit" class="text-sm text-red-600 hover:underline">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
                     Latest transactions
                 </h3>
 

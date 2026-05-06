@@ -30,7 +30,7 @@ class DashboardController extends Controller
 
         $categories = Category::query()
             ->where('user_id', $user->id)
-            ->orderBy('name')
+            ->latest()
             ->get();
 
         $transactions = Transaction::query()

@@ -15,9 +15,11 @@ Route::get('/dashboard', DashboardController::class)
     ->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->name('web.')->group(function () {
-    Route::post('/categories', [WebCategoryController::class, 'store'])->name('categories.store');
     Route::post('/transactions', [WebTransactionController::class, 'store'])->name('transactions.store');
     Route::delete('/transactions/{transaction}', [WebTransactionController::class, 'destroy'])->name('transactions.destroy');
+
+    Route::post('/categories', [WebCategoryController::class, 'store'])->name('categories.store');
+    Route::delete('/categories/{category}', [WebCategoryController::class, 'destroy'])->name('categories.destroy');
 });
 
 Route::middleware('auth')->group(function () {
