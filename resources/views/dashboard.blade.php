@@ -55,6 +55,7 @@
                             <label for="category_name" class="block text-sm font-medium text-gray-700">
                                 Name
                             </label>
+
                             <input id="category_name" name="name" type="text" value="{{ old('name') }}"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                 placeholder="Food, Salary, Transport..." required>
@@ -68,6 +69,7 @@
                             <label for="category_type" class="block text-sm font-medium text-gray-700">
                                 Type
                             </label>
+
                             <select id="category_type" name="type"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
                                 <option value="expense" @selected(old('type') === 'expense')>Expense</option>
@@ -91,17 +93,36 @@
                         Add transaction
                     </h3>
 
-                    <form method="POST" action="{{ route('web.transactions.store') }}" class="space-y-4">
+                    @php
+                        $categoryOptions = $categories
+                            ->map(
+                                fn($category) => [
+                                    'id' => (string) $category->id,
+                                    'name' => $category->name,
+                                    'type' => $category->type,
+                                ],
+                            )
+                            ->values();
+                    @endphp
+
+                    <form method="POST" action="{{ route('web.transactions.store') }}" class="space-y-4"
+                        x-data="{
+                            transactionType: '{{ old('type', 'expense') }}',
+                            selectedCategory: '{{ old('category_id', '') }}',
+                            categories: @js($categoryOptions)
+                        }">
                         @csrf
 
                         <div>
                             <label for="transaction_type" class="block text-sm font-medium text-gray-700">
                                 Type
                             </label>
-                            <select id="transaction_type" name="type"
+
+                            <select id="transaction_type" name="type" x-model="transactionType"
+                                @change="selectedCategory = ''"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
-                                <option value="expense" @selected(old('type') === 'expense')>Expense</option>
-                                <option value="income" @selected(old('type') === 'income')>Income</option>
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
                             </select>
 
                             @error('type')
@@ -113,16 +134,21 @@
                             <label for="category_id" class="block text-sm font-medium text-gray-700">
                                 Category
                             </label>
-                            <select id="category_id" name="category_id"
+
+                            <select id="category_id" name="category_id" x-model="selectedCategory"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                 <option value="">No category</option>
 
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" @selected((int) old('category_id') === $category->id)>
-                                        {{ $category->name }} — {{ ucfirst($category->type) }}
-                                    </option>
-                                @endforeach
+                                <template
+                                    x-for="category in categories.filter(category => category.type === transactionType)"
+                                    :key="category.id">
+                                    <option :value="category.id" x-text="category.name"></option>
+                                </template>
                             </select>
+
+                            <p class="text-xs text-gray-500 mt-1">
+                                Only categories matching the selected transaction type are shown.
+                            </p>
 
                             @error('category_id')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -133,6 +159,7 @@
                             <label for="amount" class="block text-sm font-medium text-gray-700">
                                 Amount
                             </label>
+
                             <input id="amount" name="amount" type="number" step="0.01" min="0.01"
                                 value="{{ old('amount') }}"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
@@ -146,6 +173,7 @@
                             <label for="transaction_date" class="block text-sm font-medium text-gray-700">
                                 Date
                             </label>
+
                             <input id="transaction_date" name="transaction_date" type="date"
                                 value="{{ old('transaction_date', now()->toDateString()) }}"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
@@ -159,6 +187,7 @@
                             <label for="description" class="block text-sm font-medium text-gray-700">
                                 Description
                             </label>
+
                             <input id="description" name="description" type="text" value="{{ old('description') }}"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                                 placeholder="Lunch, salary, fuel...">
@@ -206,7 +235,7 @@
                                         <td class="px-4 py-2">
                                             <span
                                                 class="inline-flex items-center rounded px-2 py-1 text-xs font-medium
-                                    {{ $category->type === 'income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                                {{ $category->type === 'income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                                 {{ ucfirst($category->type) }}
                                             </span>
                                         </td>
@@ -305,7 +334,6 @@
                     </div>
                 @endif
             </div>
-
         </div>
     </div>
 </x-app-layout>
