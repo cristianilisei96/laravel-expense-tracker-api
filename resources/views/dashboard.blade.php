@@ -33,7 +33,11 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="text-sm text-gray-500">Balance this month</div>
                     <div class="mt-2 text-3xl font-bold {{ $balance >= 0 ? 'text-gray-900' : 'text-red-700' }}">
-                        ${{ number_format((float) $balance, 2) }}
+                        @if ($balance < 0)
+                            -${{ number_format(abs((float) $balance), 2) }}
+                        @else
+                            ${{ number_format((float) $balance, 2) }}
+                        @endif
                     </div>
                 </div>
             </div>
@@ -191,6 +195,7 @@
                                     <th class="px-4 py-2 text-left font-medium text-gray-500">Category</th>
                                     <th class="px-4 py-2 text-left font-medium text-gray-500">Description</th>
                                     <th class="px-4 py-2 text-right font-medium text-gray-500">Amount</th>
+                                    <th class="px-4 py-2 text-right font-medium text-gray-500">Actions</th>
                                 </tr>
                             </thead>
 
@@ -198,7 +203,7 @@
                                 @foreach ($transactions as $transaction)
                                     <tr>
                                         <td class="px-4 py-2">
-                                            {{ $transaction->transaction_date?->format('Y-m-d') }}
+                                            {{ \Illuminate\Support\Carbon::parse($transaction->transaction_date)->format('d-m-Y') }}
                                         </td>
 
                                         <td class="px-4 py-2">
@@ -217,8 +222,26 @@
                                             {{ $transaction->description ?? '-' }}
                                         </td>
 
-                                        <td class="px-4 py-2 text-right font-semibold">
-                                            ${{ number_format((float) $transaction->amount, 2) }}
+                                        <td
+                                            class="px-4 py-2 text-right font-semibold {{ $transaction->type === 'income' ? 'text-green-700' : 'text-red-700' }}">
+                                            @if ($transaction->type === 'income')
+                                                +${{ number_format((float) $transaction->amount, 2) }}
+                                            @else
+                                                -${{ number_format((float) $transaction->amount, 2) }}
+                                            @endif
+                                        </td>
+
+                                        <td class="px-4 py-2 text-right">
+                                            <form method="POST"
+                                                action="{{ route('web.transactions.destroy', $transaction) }}"
+                                                onsubmit="return confirm('Delete this transaction?');">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button type="submit" class="text-sm text-red-600 hover:underline">
+                                                    Delete
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach

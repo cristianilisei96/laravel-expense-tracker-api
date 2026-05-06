@@ -49,4 +49,17 @@ class TransactionController extends Controller
             ->route('dashboard')
             ->with('success', 'Transaction created successfully.');
     }
+
+    public function destroy(Request $request, Transaction $transaction): RedirectResponse
+    {
+        if ($transaction->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $transaction->delete();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Transaction deleted successfully.');
+    }
 }
