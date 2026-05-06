@@ -1,6 +1,7 @@
 @props([
     'type' => 'success',
     'message' => null,
+    'duration' => 4000,
 ])
 
 @php
@@ -14,7 +15,23 @@
 @endphp
 
 @if ($message)
-    <div {{ $attributes->merge(['class' => "border px-4 py-3 rounded {$classes}"]) }}>
-        {{ $message }}
+    <div x-data="{
+        show: true,
+        close() {
+            this.show = false;
+    
+            setTimeout(() => {
+                this.$el.remove();
+            }, 250);
+        }
+    }" x-init="setTimeout(() => close(), {{ $duration }})" x-show="show" x-transition.opacity.duration.200ms
+        {{ $attributes->merge(['class' => "flex items-center justify-between gap-4 border px-4 py-3 rounded {$classes}"]) }}>
+        <div class="text-sm font-medium">
+            {{ $message }}
+        </div>
+
+        <button type="button" class="text-current opacity-70 hover:opacity-100" @click="close()" aria-label="Close">
+            <span class="text-lg leading-none">&times;</span>
+        </button>
     </div>
 @endif
